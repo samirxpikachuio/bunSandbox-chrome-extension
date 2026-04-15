@@ -19,6 +19,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Load saved preferences
+  chrome.storage.local.get(['code', 'packages'], (data) => {
+    if (data.code) codeEditor.value = data.code;
+    if (data.packages) packagesInput.value = data.packages;
+  });
+
+  // Save preferences on input
+  codeEditor.addEventListener('input', () => {
+    chrome.storage.local.set({ code: codeEditor.value });
+  });
+
+  packagesInput.addEventListener('input', () => {
+    chrome.storage.local.set({ packages: packagesInput.value });
+  });
+
   // Check server status on load
   checkServerStatus();
 
