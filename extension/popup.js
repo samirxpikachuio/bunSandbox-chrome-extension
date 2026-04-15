@@ -1,10 +1,6 @@
-import { executeInWebContainer } from './webcontainer-handler.js';
 import { executeOnServer } from './server-handler.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
-  console.log('Cross-Origin Isolated:', self.crossOriginIsolated);
-  const modeSelect = document.getElementById('mode');
-  const runtimeSelect = document.getElementById('runtime');
   const codeTextarea = document.getElementById('code');
   const packagesInput = document.getElementById('packages');
   const runBtn = document.getElementById('runBtn');
@@ -14,23 +10,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   const packagesGroup = document.getElementById('packagesGroup');
 
   // Load saved preferences
-  chrome.storage.local.get(['mode', 'runtime', 'code', 'packages'], (data) => {
-    if (data.mode) modeSelect.value = data.mode;
-    if (data.runtime) runtimeSelect.value = data.runtime;
+  chrome.storage.local.get(['code', 'packages'], (data) => {
     if (data.code) codeTextarea.value = data.code;
     if (data.packages) packagesInput.value = data.packages;
-    updateUI();
-  });
-
-  // Handle mode changes
-  modeSelect.addEventListener('change', () => {
-    chrome.storage.local.set({ mode: modeSelect.value });
-    updateUI();
-  });
-
-  // Handle runtime changes
-  runtimeSelect.addEventListener('change', () => {
-    chrome.storage.local.set({ runtime: runtimeSelect.value });
     updateUI();
   });
 
@@ -63,50 +45,38 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   function updateUI() {
-    // Show packages input for all modes that support it (both Autonomous Node and Server Bun)
     packagesGroup.style.display = 'flex';
   }
 
   runBtn.addEventListener('click', async () => {
-    const mode = modeSelect.value;
-    const runtime = runtimeSelect.value;
     const code = codeTextarea.value;
     const packages = packagesInput.value;
 
     const originalContent = runBtn.innerHTML;
     runBtn.disabled = true;
     runBtn.innerHTML = '<span class="loading">Running...</span>';
-    outputDiv.textContent = 'Executing...';
+    outputDiv.textContent = 'Executing on Bun server...';
     outputDiv.classList.add('loading');
     
-    if (packages) {
-      outputDiv.textContent += '\n(Installing packages: ' + packages + ')';
-    }
-
     try {
-      let result;
-      if (mode === 'autonomous') {
-        if (runtime === 'node') {
-          result = await executeInWebContainer(code, packages);
-        } else {
-          outputDiv.textContent = 'Autonomous Bun is currently experimental. Switching to Server-Based...';
-          result = await executeOnServer(code, packages);
-        }
-      } else {
-        result = await executeOnServer(code, packages);
-      }
+      // Always use bun runtime
+      const result = await executeOnServer(code, packages, 'bun');
 
       const output = (result.stdout || '') + (result.stderr || '');
       outputDiv.textContent = output || (result.success ? '(Success, no output)' : 'Unknown error');
+      
       if (!result.success && !output) {
-        outputDiv.textContent = 'Execution failed.';
+        outputDiv.textContent = 'Execution failed. Ensure local Bun server is running at http://localhost:3006';
       }
     } catch (err) {
-      outputDiv.textContent = 'Error: ' + err.message;
+      outputDiv.textContent = 'Error: ' + err.message + '\n\nMake sure your local Bun server is running:\ncd server && bun run server.ts';
     } finally {
       runBtn.disabled = false;
       runBtn.innerHTML = originalContent;
       outputDiv.classList.remove('loading');
+      // Auto-scroll
+      const terminal = outputDiv.parentElement;
+      terminal.scrollTop = terminal.scrollHeight;
     }
   });
 });

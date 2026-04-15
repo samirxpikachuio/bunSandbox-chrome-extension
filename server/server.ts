@@ -1,4 +1,4 @@
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 
@@ -16,7 +16,7 @@ Bun.serve({
     }
 
     const url = new URL(req.url);
-    if (req.method === "POST" && url.pathname === "/run") {
+    if (req.method === "POST" && (url.pathname === "/execute" || url.pathname === "/run")) {
       try {
         const { code, packages } = await req.json();
         const output = await executeBunEnvironment(code, packages);
@@ -37,60 +37,58 @@ Bun.serve({
 
 async function executeBunEnvironment(code: string, packages: string) {
   // Create temp dir
-  const prefix = join(tmpdir(), "bun-sandbox-tmp-");
+  const prefix = join(tmpdir(), "bun-sandbox-");
   const workDir = await mkdtemp(prefix);
-
-  let outputText = "";
-  let errorText = "";
 
   try {
     // 1. Install packages if requested
     if (packages && packages.trim().length > 0) {
       const packageList = packages.split(' ').filter(p => p.trim() !== '');
       if (packageList.length > 0) {
-        console.log(`Installing packages in ${workDir}: ${packageList.join(', ')}`);
+        console.log(`[Bun] Installing: ${packageList.join(', ')}`);
         const installProc = Bun.spawn(["bun", "add", ...packageList], {
           cwd: workDir,
-          stdout: "pipe",
-          stderr: "pipe",
         });
-        const installResult = await installProc.exited;
-        if (installResult !== 0) {
-          const err = await new Response(installProc.stderr).text();
-          throw new Error(`Package install failed: \n${err}`);
-        }
+        await installProc.exited;
       }
     }
 
     // 2. Write code to file
     const codeFile = join(workDir, "index.ts");
-    await Bun.write(codeFile, code);
+    await writeFile(codeFile, code);
 
     // 3. Execute code
-    console.log(`Executing code in ${workDir}`);
+    console.log(`[Bun] Running script...`);
     const runProc = Bun.spawn(["bun", "run", "index.ts"], {
       cwd: workDir,
       stdout: "pipe",
       stderr: "pipe",
     });
 
-    const runResult = await runProc.exited;
-    outputText = await new Response(runProc.stdout).text();
-    errorText = await new Response(runProc.stderr).text();
+    await runProc.exited;
+    
+    const stdout = await new Response(runProc.stdout).text();
+    const stderr = await new Response(runProc.stderr).text();
 
     return {
-      success: runResult === 0,
-      stdout: outputText,
-      stderr: errorText,
+      success: true,
+      stdout,
+      stderr,
+    };
+  } catch (err: any) {
+    return {
+      success: false,
+      stdout: "",
+      stderr: err.message,
     };
   } finally {
     // Clean up
-    try {
-      await rm(workDir, { recursive: true, force: true });
-    } catch (cleanErr) {
-      console.error(`Failed to clean up dir ${workDir}`, cleanErr);
-    }
+    setTimeout(async () => {
+      try {
+        await rm(workDir, { recursive: true, force: true });
+      } catch {}
+    }, 2000);
   }
 }
 
-console.log("Bun Sandbox Server running on http://localhost:3006");
+console.log("Bun-only Sandbox Server running on http://localhost:3006");

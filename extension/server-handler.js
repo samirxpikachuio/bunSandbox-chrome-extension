@@ -1,11 +1,11 @@
-export async function executeOnServer(code, packages = "") {
+export async function executeOnServer(code, packages = "", runtime = "bun") {
   try {
-    const response = await fetch("http://localhost:3006/run", {
-      method: "POST",
+    const response = await fetch('http://localhost:3006/execute', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ code, packages }),
+      body: JSON.stringify({ code, packages, runtime }),
     });
 
     if (!response.ok) {
