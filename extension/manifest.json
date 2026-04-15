@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Bun Sandbox",
-  "version": "1.0",
+  "version": "2.0",
   "description": "Run Bun js code and install packages directly in your browser.",
   "action": {
     "default_title": "Open Bun Sandbox",
