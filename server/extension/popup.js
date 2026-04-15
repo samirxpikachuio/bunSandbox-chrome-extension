@@ -5,14 +5,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   const modeSelect = document.getElementById('mode');
   const runtimeSelect = document.getElementById('runtime');
   const codeTextarea = document.getElementById('code');
+  const packagesInput = document.getElementById('packages');
   const runBtn = document.getElementById('runBtn');
+  const clearBtn = document.getElementById('clearBtn');
   const outputDiv = document.getElementById('output');
+  const packagesGroup = document.getElementById('packagesGroup');
 
   // Load saved preferences
-  chrome.storage.local.get(['mode', 'runtime', 'code'], (data) => {
+  chrome.storage.local.get(['mode', 'runtime', 'code', 'packages'], (data) => {
     if (data.mode) modeSelect.value = data.mode;
     if (data.runtime) runtimeSelect.value = data.runtime;
     if (data.code) codeTextarea.value = data.code;
+    if (data.packages) packagesInput.value = data.packages;
     updateUI();
   });
 
@@ -25,6 +29,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Handle runtime changes
   runtimeSelect.addEventListener('change', () => {
     chrome.storage.local.set({ runtime: runtimeSelect.value });
+    updateUI();
   });
 
   // Handle code changes
@@ -32,25 +37,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     chrome.storage.local.set({ code: codeTextarea.value });
   });
 
+  // Handle packages changes
+  packagesInput.addEventListener('input', () => {
+    chrome.storage.local.set({ packages: packagesInput.value });
+  });
+
+  // Handle clear button
+  clearBtn.addEventListener('click', () => {
+    outputDiv.textContent = 'Output cleared.';
+  });
+
   function updateUI() {
-    const isAutonomous = modeSelect.value === 'autonomous';
+    const isServer = modeSelect.value === 'server';
+    const isBun = runtimeSelect.value === 'bun';
     
-    // In autonomous mode, we currently only support Node.js (WebContainers)
-    if (isAutonomous) {
-      // If user chooses Autonomous, force Node.js for now or warn about Bun.
-      if (runtimeSelect.value === 'bun') {
-        // We might want to switch to Node automatically if Bun isn't available in Autonomous mode.
-        // For now, let's just let it fail or provide a message.
-      }
-    }
+    // Show packages input only for Server-Based Bun for now
+    packagesGroup.style.display = (isServer && isBun) ? 'block' : 'none';
   }
 
   runBtn.addEventListener('click', async () => {
     const mode = modeSelect.value;
     const runtime = runtimeSelect.value;
     const code = codeTextarea.value;
+    const packages = packagesInput.value;
 
     outputDiv.textContent = 'Executing...';
+    if (packages && mode === 'server') {
+      outputDiv.textContent += '\n(This may take a moment to install packages: ' + packages + ')';
+    }
     runBtn.disabled = true;
 
     try {
@@ -60,11 +74,10 @@ document.addEventListener('DOMContentLoaded', async () => {
           result = await executeInWebContainer(code);
         } else {
           outputDiv.textContent = 'Autonomous Bun is currently experimental. Switching to Server-Based...';
-          result = await executeOnServer(code);
+          result = await executeOnServer(code, packages);
         }
       } else {
-        // Server-Based (Works for both Bun and Node, but mostly for Bun in this setup)
-        result = await executeOnServer(code);
+        result = await executeOnServer(code, packages);
       }
 
       const output = (result.stdout || '') + (result.stderr || '');
