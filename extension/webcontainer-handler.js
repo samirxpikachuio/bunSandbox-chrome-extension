@@ -6,10 +6,8 @@ let webcontainerInstance = null;
 async function bootWebContainer() {
   if (webcontainerInstance) return webcontainerInstance;
   
-  // Note: In a real extension, you would import this from a bundled file or a specific CDN.
-  // For this demo, we assume @webcontainer/api is available globally or via dynamic import.
   try {
-    const { WebContainer } = await import('https://unpkg.com/@webcontainer/api?module');
+    const { WebContainer } = await import('./webcontainer-api.js');
     webcontainerInstance = await WebContainer.boot();
     return webcontainerInstance;
   } catch (err) {

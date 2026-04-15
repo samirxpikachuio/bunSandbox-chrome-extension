@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Bun & Node.js Sandbox",
-  "version": "1.1",
+  "version": "1.3",
   "description": "Run Bun and Node.js code autonomously via WebContainers or local server.",
   "permissions": [
     "storage",
@@ -17,7 +17,7 @@
     }
   },
   "content_security_policy": {
-    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'; transition-src 'self'; group-src 'self'; worker-src 'self'; style-src 'self' 'unsafe-inline';"
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
   },
   "cross_origin_embedder_policy": {
     "value": "require-corp"

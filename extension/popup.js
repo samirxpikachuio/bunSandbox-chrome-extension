@@ -2,6 +2,7 @@ import { executeInWebContainer } from './webcontainer-handler.js';
 import { executeOnServer } from './server-handler.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
+  console.log('Cross-Origin Isolated:', self.crossOriginIsolated);
   const modeSelect = document.getElementById('mode');
   const runtimeSelect = document.getElementById('runtime');
   const codeTextarea = document.getElementById('code');
