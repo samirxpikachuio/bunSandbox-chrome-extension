@@ -1,16 +1,28 @@
 {
   "manifest_version": 3,
-  "name": "Bun Sandbox",
-  "version": "2.0",
-  "description": "Run Bun js code and install packages directly in your browser.",
-  "action": {
-    "default_title": "Open Bun Sandbox",
-    "default_popup": "popup.html"
-  },
+  "name": "Bun & Node.js Sandbox",
+  "version": "1.1",
+  "description": "Run Bun and Node.js code autonomously via WebContainers or local server.",
   "permissions": [
-    "storage"
+    "storage",
+    "activeTab"
   ],
   "host_permissions": [
     "http://localhost:3006/*"
-  ]
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+     
+    }
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'; transition-src 'self'; group-src 'self'; worker-src 'self'; style-src 'self' 'unsafe-inline';"
+  },
+  "cross_origin_embedder_policy": {
+    "value": "require-corp"
+  },
+  "cross_origin_opener_policy": {
+    "value": "same-origin"
+  }
 }

@@ -3,56 +3,304 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bun Sandbox</title>
-  <link rel="stylesheet" href="popup.css">
+  <title>Sandbox 🚀</title>
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --bg-card: #1e293b;
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --terminal-bg: #000000;
+      --success: #22c55e;
+      --error: #ef4444;
+      --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: 'Fira Code', 'JetBrains Mono', 'Source Code Pro', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      width: 420px;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-ui);
+      padding: 16px;
+      overflow-x: hidden;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+    }
+
+    header h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      background: linear-gradient(to right, #818cf8, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .grid-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    select, input, textarea {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+      outline: none;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    select:focus, input:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .editor-container {
+      margin-bottom: 16px;
+      position: relative;
+    }
+
+    textarea {
+      width: 100%;
+      height: 180px;
+      font-family: var(--font-mono);
+      line-height: 1.5;
+      resize: vertical;
+      padding: 14px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    #runBtn {
+      flex: 2;
+      background-color: var(--accent);
+      color: white;
+    }
+
+    #runBtn:hover:not(:disabled) {
+      background-color: var(--accent-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3), 0 4px 6px -2px rgba(99, 102, 241, 0.05);
+    }
+
+    #runBtn:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    #runBtn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    #clearBtn {
+      flex: 1;
+      background-color: var(--border);
+      color: var(--text-main);
+    }
+
+    #clearBtn:hover {
+      background-color: #475569;
+      transform: translateY(-1px);
+    }
+
+    .terminal {
+      background-color: var(--terminal-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      position: relative;
+      min-height: 120px;
+      max-height: 250px;
+      overflow-y: auto;
+      box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+    }
+
+    .terminal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      border-bottom: 1px solid #1e293b;
+      padding-bottom: 6px;
+    }
+
+    .terminal-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .dot.red { background-color: #ff5f56; }
+    .dot.yellow { background-color: #ffbd2e; }
+    .dot.green { background-color: #27c93f; }
+
+    #output {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: #cbd5e1;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .copy-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      transition: color 0.2s;
+    }
+
+    .copy-btn:hover {
+      color: var(--text-main);
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Loading Pulse */
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
+    .loading {
+      animation: pulse 1.5s infinite ease-in-out;
+    }
+  </style>
 </head>
 <body>
-  <div class="app-container">
-    <header class="header">
-      <div class="logo">
-        <svg viewBox="0 0 100 100" width="24" height="24">
-          <circle cx="50" cy="50" r="40" fill="#fdfae5" />
-          <path d="M 30 50 Q 50 80 70 50 Q 50 20 30 50" fill="#f4d1ad" />
-        </svg>
-        <h1>Bun Sandbox</h1>
-      </div>
-      <div class="status" id="status-indicator">● Offline</div>
-    </header>
+  <header>
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent)">
+      <path d="m8 3 4 8 5-5 5 15H2L8 3z"/>
+    </svg>
+    <h1>Sandbox</h1>
+  </header>
 
-    <div class="content-wrapper">
-      <div class="input-group">
-        <label for="packages-input">Dependencies (space separated)</label>
-        <input type="text" id="packages-input" placeholder="e.g. chalk figlet cowsay" spellcheck="false" autocomplete="off" />
-      </div>
+  <div class="grid-controls">
+    <div class="control-group">
+      <label for="mode">Mode</label>
+      <select id="mode">
+        <option value="autonomous">Autonomous</option>
+        <option value="server">Server-Based</option>
+      </select>
+    </div>
 
-      <div class="editor-container">
-        <label for="code-editor">index.ts</label>
-        <textarea id="code-editor" spellcheck="false" placeholder="// Write Bun code here...
-import chalk from 'chalk';
-console.log(chalk.green('Hello Bun in Browser!'));
-"></textarea>
-      </div>
-
-      <div class="actions">
-        <button id="run-btn" class="run-btn">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="5 3 19 12 5 21 5 3"></polygon>
-          </svg>
-          Run Code
-        </button>
-      </div>
-
-      <div class="console-container">
-        <div class="console-header">
-          <span>Terminal</span>
-          <button id="clear-btn" class="clear-btn">Clear</button>
-        </div>
-        <div class="console-output" id="console-output">
-          <span class="muted">Ready. Enter some code and hit Run. Make sure your local companion server is running!</span>
-        </div>
-      </div>
+    <div class="control-group">
+      <label for="runtime">Runtime</label>
+      <select id="runtime">
+        <option value="node">Node.js</option>
+        <option value="bun">Bun</option>
+      </select>
     </div>
   </div>
-  <script src="popup.js"></script>
+
+  <div class="control-group" id="packagesGroup" style="display:none; margin-bottom: 16px;">
+    <label for="packages">NPM Packages</label>
+    <input type="text" id="packages" placeholder="e.g. lodash axios">
+  </div>
+
+  <div class="control-group editor-container">
+    <label for="code">Code Editor</label>
+    <textarea id="code" spellcheck="false" placeholder="console.log('Hello World');">console.log('Hello from ' + (typeof Bun !== 'undefined' ? 'Bun' : 'Node.js'));</textarea>
+  </div>
+
+  <div class="actions">
+    <button id="runBtn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="5 3 19 12 5 21 5 3"/>
+      </svg>
+      Run Code
+    </button>
+    <button id="clearBtn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+      </svg>
+      Clear
+    </button>
+  </div>
+
+  <div class="terminal">
+    <div class="terminal-header">
+      <div class="terminal-dots">
+        <div class="dot red"></div>
+        <div class="dot yellow"></div>
+        <div class="dot green"></div>
+      </div>
+      <button class="copy-btn" id="copyBtn" title="Copy Output">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+        </svg>
+      </button>
+    </div>
+    <div id="output">Output will appear here...</div>
+  </div>
+
+  <script src="webcontainer-handler.js" type="module"></script>
+  <script src="server-handler.js" type="module"></script>
+  <script src="popup.js" type="module"></script>
 </body>
 </html>
