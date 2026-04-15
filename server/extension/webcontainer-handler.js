@@ -18,12 +18,12 @@ async function bootWebContainer() {
   }
 }
 
-export async function executeInWebContainer(code) {
+export async function executeInWebContainer(code, packages = "") {
   try {
     const instance = await bootWebContainer();
     
-    // Write the code to index.js
-    await instance.mount({
+    // Prepare files
+    const files = {
       'index.js': {
         file: {
           contents: code,
@@ -38,14 +38,34 @@ export async function executeInWebContainer(code) {
           })
         }
       }
-    });
+    };
 
-    // Run the code
-    const process = await instance.spawn('node', ['index.js']);
-    
+    await instance.mount(files);
+
     let stdout = '';
     let stderr = '';
 
+    // 1. Install packages if requested
+    if (packages && packages.trim().length > 0) {
+      const packageList = packages.split(' ').filter(p => p.trim() !== '');
+      if (packageList.length > 0) {
+        const installProcess = await instance.spawn('npm', ['install', ...packageList]);
+        
+        installProcess.output.pipeTo(new WritableStream({
+          write(data) { stdout += data; }
+        }));
+
+        const installExitCode = await installProcess.exit;
+        if (installExitCode !== 0) {
+          return { success: false, stdout, stderr: "Package installation failed." };
+        }
+        stdout = ''; // Clear install output to show only code output
+      }
+    }
+
+    // 2. Run the code
+    const process = await instance.spawn('node', ['index.js']);
+    
     process.output.pipeTo(new WritableStream({
       write(data) {
         stdout += data;

@@ -48,11 +48,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   function updateUI() {
-    const isServer = modeSelect.value === 'server';
-    const isBun = runtimeSelect.value === 'bun';
-    
-    // Show packages input only for Server-Based Bun for now
-    packagesGroup.style.display = (isServer && isBun) ? 'block' : 'none';
+    // Show packages input for all modes that support it (both Autonomous Node and Server Bun)
+    packagesGroup.style.display = 'block';
   }
 
   runBtn.addEventListener('click', async () => {
@@ -62,8 +59,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const packages = packagesInput.value;
 
     outputDiv.textContent = 'Executing...';
-    if (packages && mode === 'server') {
-      outputDiv.textContent += '\n(This may take a moment to install packages: ' + packages + ')';
+    if (packages) {
+      outputDiv.textContent += '\n(Installing packages: ' + packages + ')';
     }
     runBtn.disabled = true;
 
@@ -71,7 +68,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       let result;
       if (mode === 'autonomous') {
         if (runtime === 'node') {
-          result = await executeInWebContainer(code);
+          result = await executeInWebContainer(code, packages);
         } else {
           outputDiv.textContent = 'Autonomous Bun is currently experimental. Switching to Server-Based...';
           result = await executeOnServer(code, packages);
