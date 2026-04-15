@@ -1,30 +1,33 @@
-# Bun & Node.js Sandbox Extension
+# Sandbox Chrome Extension 🚀
 
-This extension allows you to run Node.js and Bun code in two modes:
+This extension provides a high-performance environment to run Bun and TypeScript code directly from your browser's side panel.
 
-## 1. Autonomous Mode (WebContainers)
-- **Runtime**: Node.js (Default).
-- **How it works**: Uses the `@webcontainer/api` to run a full Node.js environment in your browser via WebAssembly.
-- **Benefits**: 100% offline, no backend required.
-- **Note**: Requires a browser that supports `SharedArrayBuffer` and Cross-Origin isolation.
+## Implementation Details
 
-## 2. Server-Based Mode
-- **Runtime**: Bun.
-- **How it works**: Sends code to a local Bun server (running on `localhost:3006`).
-- **Benefits**: Fast execution, full access to the Bun runtime.
+### Execution Flow
+1. **User Input**: The user enters code and (optionally) NPM packages in the side panel.
+2. **Persistence**: Data is saved to `chrome.storage.local`.
+3. **Request**: The code and package list are sent via a POST request to `http://localhost:3006/execute`.
+4. **Execution**:
+    - The local Bun server creates a temporary directory.
+    - It installs requested packages using `bun add`.
+    - It writes the code to an `index.ts` file.
+    - It executes the file using `bun run`.
+5. **Feedback**: `stdout` and `stderr` are returned and displayed in the virtual terminal.
 
 ## Installation
 1. Open Chrome and go to `chrome://extensions/`.
-2. Enable "Developer mode".
-3. Click "Load unpacked" and select the `extension` directory.
+2. Enable **Developer mode**.
+3. Click **Load unpacked** and select this directory.
+4. Pin the extension for quick access.
 
-## Running the Server
-To use the Bun mode, make sure the local server is running:
+## Requirements
+To use this extension, you must have the **Bun Sandbox Server** running locally.
 ```bash
+# From the project root
+cd server
 bun run server.ts
 ```
 
-## Features
-- Persistence: Your code and mode selection are saved automatically.
-- Dual Runtimes: Toggle between Node.js and Bun.
-- Console Output: Real-time feedback from your code.
+## Security
+This extension only communicates with `http://localhost:3006`. No telemetry or user code is sent to external servers.

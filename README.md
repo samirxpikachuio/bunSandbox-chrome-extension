@@ -1,17 +1,16 @@
-# Sandbox 🚀: High-Performance Bun & Node.js Environment
+# Sandbox 🚀: High-Performance Bun Sandbox for Chrome
 
 ![Logo](extension/icons/icon.png)
 
-A professional-grade Chrome extension and local server environment designed for rapid testing, prototyping, and execution of Node.js and Bun code directly from your browser.
+A high-performance Chrome extension and local server environment designed for rapid testing, prototyping, and execution of Bun and TypeScript code directly from your browser's side panel.
 
 ## 🌟 Key Features
 
-- **Dual Runtime Support**: Seamlessly toggle between **Node.js** (via WebContainers) and **Bun** (via local server).
-- **Autonomous Mode**: Run Node.js directly in your browser using WebAssembly. 100% offline and secure.
-- **Server-Based Execution**: Harness the full power of the Bun runtime for blazingly fast execution.
-- **Persistent Workspace**: Your code, settings, and runtime selection are automatically saved.
-- **Rich Console Interface**: Real-time logging and error reporting with high readability.
-- **Modern UI**: A sleek, premium side-panel interface designed for developers.
+- **Blazing Fast Bun Execution**: Harness the full power of the Bun runtime for near-instant execution.
+- **On-the-fly Package Support**: Install any NPM package dynamically just by listing them in the packages field.
+- **Side Panel Integration**: A sleek, premium developer interface that stays open while you browse.
+- **Persistent Workspace**: Your code and packages are automatically saved to your browser's local storage.
+- **Real-time Terminal Output**: A clean, readable terminal interface with copy-to-clipboard functionality.
 
 ## 🚀 Quick Start
 
@@ -20,37 +19,39 @@ A professional-grade Chrome extension and local server environment designed for 
 2. Enable **Developer mode** in the top right corner.
 3. Click **Load unpacked**.
 4. Select the `extension` directory within this project.
+5. Open the Side Panel (click the extension icon).
 
-### 2. Set Up the Bun Server (Optional)
-To use the Bun runtime, ensure you have Bun installed and then start the handler:
+### 2. Set Up the Bun Server
+To execute code, you must have the local server running:
 ```bash
+cd server
+bun install
 bun run server.ts
 ```
 The server will start on `http://localhost:3006`.
 
-## 🛠️ Tech Stack
-
-- **Frontend**: HTML5, Vanilla CSS3, Modern JavaScript.
-- **Runtimes**:
-  - **Node.js**: Powered by `@webcontainer/api`.
-  - **Bun**: Local execution via a Bun-powered server.
-- **Communication**: Fetch API for server-mode, WebAssembly for autonomous-mode.
-
 ## 📂 Project Structure
 
 - `extension/`: The Chrome extension source code.
-  - `icons/`: Branding assets.
-  - `manifest.json`: Extension configuration.
-  - `background.js`: Service worker logic.
-  - `popup.html/js`: The core sandbox UI.
-- `server/`: The local execution server for Bun mode.
-- `README.md`: This file.
+  - `manifest.json`: Configuration for the Chrome environment.
+  - `popup.html/js`: The core sandbox UI and logic.
+  - `server-handler.js`: Handles communication with the Bun server.
+- `server/`: The Bun-powered execution environment.
+  - `server.ts`: The HTTP server that manages temporary execution directories and package installation.
+  - `Dockerfile`: For containerized deployment of the execution server.
+
+## 🛠️ Tech Stack
+
+- **Frontend**: Vanilla HTML5, CSS3, Modern JavaScript.
+- **Runtime**: [Bun](https://bun.sh) (Local).
+- **Communication**: Fetch API for secure `localhost` communication.
 
 ## 🔒 Security & Privacy
 
-- **Autonomous Mode**: Code runs in a sandboxed WebContainer within your browser tab.
-- **Server Mode**: Only communicates with `localhost`. No data ever leaves your machine.
+- Your code is executed locally on your own machine.
+- No data ever leaves your computer; the extension only communicates with `localhost:3006`.
+- Package installations happen in temporary directories that are automatically cleaned up.
 
 ---
 
-Built with ❤️ by the Sandbox Team.
+Built for speed and developer productivity.
