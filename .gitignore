@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+bun.lockb
+
+# Environment
+.env
+.env.local
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Temp Files
+server/tmp/
+extension/tmp/

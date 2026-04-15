@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bun Sandbox</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="app-container">
+    <header class="header">
+      <div class="logo">
+        <svg viewBox="0 0 100 100" width="24" height="24">
+          <circle cx="50" cy="50" r="40" fill="#fdfae5" />
+          <path d="M 30 50 Q 50 80 70 50 Q 50 20 30 50" fill="#f4d1ad" />
+        </svg>
+        <h1>Bun Sandbox</h1>
+      </div>
+      <div class="status" id="status-indicator">● Offline</div>
+    </header>
+
+    <div class="content-wrapper">
+      <div class="input-group">
+        <label for="packages-input">Dependencies (space separated)</label>
+        <input type="text" id="packages-input" placeholder="e.g. chalk figlet cowsay" spellcheck="false" autocomplete="off" />
+      </div>
+
+      <div class="editor-container">
+        <label for="code-editor">index.ts</label>
+        <textarea id="code-editor" spellcheck="false" placeholder="// Write Bun code here...
+import chalk from 'chalk';
+console.log(chalk.green('Hello Bun in Browser!'));
+"></textarea>
+      </div>
+
+      <div class="actions">
+        <button id="run-btn" class="run-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          Run Code
+        </button>
+      </div>
+
+      <div class="console-container">
+        <div class="console-header">
+          <span>Terminal</span>
+          <button id="clear-btn" class="clear-btn">Clear</button>
+        </div>
+        <div class="console-output" id="console-output">
+          <span class="muted">Ready. Enter some code and hit Run. Make sure your local companion server is running!</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

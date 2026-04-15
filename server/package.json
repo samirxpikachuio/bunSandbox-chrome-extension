@@ -1,0 +1,13 @@
+{
+  "name": "bun-sandbox-server",
+  "version": "1.0.0",
+  "description": "Local server to run Bun code from Chrome extension",
+  "module": "server.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
